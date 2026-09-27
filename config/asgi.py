@@ -1,10 +1,7 @@
-"""
-ASGI config for config project.
+"""Точка входа ASGI для проекта task_manager.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.1/howto/deployment/asgi/
+Предоставляет серверу ASGI объект application. Если модуль настроек
+не задан в окружении, использует config.settings.
 """
 
 import os

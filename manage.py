@@ -1,11 +1,18 @@
 #!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+"""Точка входа для выполнения административных команд Django."""
 import os
 import sys
 
 
 def main():
-    """Run administrative tasks."""
+    """Выполнить команду Django, переданную в аргументах командной строки.
+
+    Использует config.settings, если DJANGO_SETTINGS_MODULE не задан
+    в окружении, и передает sys.argv диспетчеру команд Django.
+
+    Raises:
+        ImportError: Если не удалось импортировать диспетчер команд Django.
+    """
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     try:
         from django.core.management import execute_from_command_line
