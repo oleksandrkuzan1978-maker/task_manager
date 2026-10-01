@@ -14,14 +14,22 @@ from .models import Task, SubTask, Category
 class TaskAdmin(admin.ModelAdmin):
     """Отображать название и время создания задачи в списке админки."""
 
-    list_display = ('title', 'created_at')
+    list_display = ('title', 'created_at', 'deadline')
+    search_fields = ('title',)
+    ordering = ('-created_at',)
+    fields = ('title', 'status', 'description', 'deadline')
+    list_per_page = 10
 
 
 @admin.register(SubTask)
 class SubTaskAdmin(admin.ModelAdmin):
     """Отображать название и время создания подзадачи в списке админки."""
 
-    list_display = ('title', 'created_at')
+    list_display = ('title', 'task', 'created_at', 'deadline')
+    search_fields = ('title', 'task__title')
+    ordering = ('-created_at', 'task')
+    fields = ('title', 'status', 'description', 'deadline')
+    list_per_page = 10
 
 
 @admin.register(Category)
@@ -29,3 +37,5 @@ class CategoryAdmin(admin.ModelAdmin):
     """Отображать имя категории в списке админки."""
 
     list_display = ('name',)
+    search_fields = ('name',)
+    fields = ('name',)

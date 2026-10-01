@@ -33,14 +33,18 @@ class Task(models.Model):
         created_at: Дата и время создания записи.
     """
 
-    title = models.CharField(max_length=80, unique_for_date='created_at')
-    description = models.TextField(blank=True)
-    categories = models.ManyToManyField("Category", verbose_name="Categories")
-    status = models.CharField(choices=Status, default=Status.NEW, max_length=20)
-    deadline = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=80, unique_for_date='created_at', verbose_name=_("Title"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    categories = models.ManyToManyField("Category", verbose_name=_("categories"), related_name="tasks")
+    status = models.CharField(choices=Status, default=Status.NEW, max_length=20, verbose_name=_("Status"))
+    deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
     class Meta:
+        db_table = "task_manager_task"
+        ordering = ["-created_at"]
+        verbose_name = _("Task")
+        verbose_name_plural = _("Tasks")
         constraints = [
             models.UniqueConstraint(
                 TruncDate("created_at"),
@@ -50,13 +54,9 @@ class Task(models.Model):
         ]
 
     def __str__(self):
-        """Вернуть название, срок выполнения и время создания задачи.
+        """Вернуть название"""
 
-        Returns:
-            str: Значения полей, разделенные запятой и пробелом.
-        """
-
-        return f"{self.title}, {self.deadline}, {self. created_at}"
+        return self.title
 
 
 class SubTask(models.Model):
@@ -75,25 +75,32 @@ class SubTask(models.Model):
         created_at: Время создания, заполняемое при первом сохранении.
     """
 
-    title = models.CharField(max_length=80, verbose_name="SubTask")
-    description = models.TextField(blank=True)
+    title = models.CharField(max_length=80, verbose_name=_("SubTask"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     task = models.ForeignKey(
         Task,
         on_delete=models.CASCADE,
         related_name="subtasks",
+        verbose_name=_("Task"),
     )
-    status = models.CharField(choices=Status, default=Status.NEW, max_length=20)
-    deadline = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(choices=Status, default=Status.NEW, max_length=20, verbose_name=_("Status"))
+    deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+
+    class Meta:
+        db_table = "task_manager_subtask"
+        ordering = ["-created_at"]
+        verbose_name = _("Subtask")
+        verbose_name_plural = _("Subtasks")
+        constraints = [models.UniqueConstraint(
+                fields=["title", "task"],
+                name="unique_subtask_title_per_task",
+            ),]
 
     def __str__(self):
-        """Вернуть название, срок выполнения и время создания подзадачи.
+        """Вернуть название подзадачи."""
 
-        Returns:
-            str: Значения полей, разделенные запятой и пробелом.
-        """
-
-        return f"{self.title}, {self.deadline}, {self. created_at}"
+        return self.title
 
 
 class Category(models.Model):
@@ -103,13 +110,16 @@ class Category(models.Model):
         name: Имя длиной до 80 символов; по умолчанию Other.
     """
 
-    name = models.CharField(max_length=80, default="Other")
+    name = models.CharField(max_length=80, default="Other", unique=True, verbose_name=_("Category"))
+
+    class Meta:
+        db_table = "task_manager_category"
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")
+        constraints = [models.UniqueConstraint(fields=["name"], name="unique_category"),]
 
     def __str__(self):
-        """Вернуть имя категории.
-
-        Returns:
-            str: Значение поля name.
-        """
+        """Вернуть имя категории."""
 
         return self.name
+
