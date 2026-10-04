@@ -36,7 +36,7 @@ category_names = ", ".join(
 t=4*'\t'
 print(f"{t}Задача: {task.title}\n{t}Описание: {task.description}"
       f"\n{t}Срок сдачи: {task.deadline}\n{t}Статус: {task.status}\n{t}Категория: {category_names}")
-print(f"\nНапоминание: срок главной задачи — {task.deadline}\n")
+#print(f"\nНапоминание: срок главной задачи — {task.deadline}\n")
 
 # SubTasks для "Prepare presentation":
 # title: "Gather information".
@@ -103,4 +103,20 @@ print("Значение subtask2.deadline после изменения:", subta
 
 #task = Task.objects.get(title="Prepare presentation")
 task.delete()
+
+# проверка удаления задачи и всех ее подзадач
+print("\nПроверка удаления задачи и всех ее подзадач")
+
+has_subtasks = SubTask.objects.filter(
+    task__title="Prepare presentation"
+).exists()
+
+if has_subtasks:
+    print("У задачи остались неудаленные подзадачи")
+else:
+    task = Task.objects.filter(title="Prepare presentation")
+    if not task:
+        print(f'{task}: Задача и ее подзадачи удалены')
+    else:
+        print('Задача не удалена')
 
