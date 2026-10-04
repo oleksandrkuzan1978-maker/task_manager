@@ -2,6 +2,8 @@
 
 from django.contrib import admin
 from .models import Task, SubTask, Category
+from django.utils import timezone
+from django.utils.formats import date_format
 
 # Register your models here.
 
@@ -30,6 +32,21 @@ class SubTaskAdmin(admin.ModelAdmin):
     ordering = ('-created_at', 'task')
     fields = ('title', 'status', 'description', 'deadline')
     list_per_page = 10
+
+    @admin.display(description="Срок родительской задачи")
+    def task_deadline_reminder(self, obj):
+        if obj is None or not obj.task_id:
+            return "Срок появится после сохранения подзадачи с выбранной задачей."
+
+        deadline = obj.task.deadline
+
+        if deadline is None:
+            return "У родительской задачи срок не указан."
+
+        if timezone.is_aware(deadline):
+            deadline = timezone.localtime(deadline)
+
+        return date_format(deadline, "d.m.Y H:i")
 
 
 @admin.register(Category)
