@@ -7,20 +7,31 @@ from django.utils.formats import date_format
 
 # Register your models here.
 
-# admin.site.register(Task)
+#admin.site.register(Task)
 # admin.site.register(SubTask)
 # admin.site.register(Category)
 
-#
+class SubTaskInline(admin.TabularInline):
+    model = SubTask
+    fields = ('title', 'status', 'description', 'deadline')
+    show_change_link = True
+    extra = 1
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     """Отображать название и время создания задачи в списке админки."""
 
-    list_display = ('title', 'created_at', 'deadline')
+    list_display = ('short_title', 'created_at', 'deadline')
     search_fields = ('title',)
     ordering = ('-created_at',)
     fields = ('title', 'status', 'description', 'deadline')
     list_per_page = 10
+
+    inlines = [SubTaskInline]
+
+    @admin.display(description="Название", ordering="title")
+    def short_title(self, obj):
+        return obj.title[:10] + "..." if len(obj.title) > 10 else obj.title
 
 
 @admin.register(SubTask)
@@ -30,7 +41,7 @@ class SubTaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'task', 'created_at', 'deadline')
     search_fields = ('title', 'task__title')
     ordering = ('-created_at', 'task')
-    fields = ('title', 'status', 'description', 'deadline')
+    fields = ('title', 'task', 'status', 'description', 'deadline')
     list_per_page = 10
 
     @admin.display(description="Срок родительской задачи")
