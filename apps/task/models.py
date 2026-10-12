@@ -1,9 +1,10 @@
 """Модели задач, подзадач и категорий и общие варианты статуса."""
 
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from  django.db.models.functions import TruncDate
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 class Status(models.TextChoices):
@@ -14,6 +15,16 @@ class Status(models.TextChoices):
     PENDING = "pending", _("Pending")
     BLOCKED = "blocked", _("Blocked")
     DONE = "done", _("Done")
+
+class Project(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Project name"))
+    description = models.TextField(verbose_name=_("Description"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+    class Meta:
+        db_table = "project_manager_project"
+        verbose_name = _("Project")
+        verbose_name_plural = _("Projects")
+        constraints = [models.UniqueConstraint(fields=["name",], name="unique_project_name")]
 
 
 class Task(models.Model):
@@ -33,9 +44,13 @@ class Task(models.Model):
         created_at: Дата и время создания записи.
     """
 
-    title = models.CharField(max_length=80, unique_for_date='created_at', verbose_name=_("Title"))
+    title = models.CharField(max_length=80
+                             , unique_for_date='created_at'
+                             , verbose_name=_("Title")
+                             , validators=[])
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     categories = models.ManyToManyField("Category", verbose_name=_("categories"), related_name="tasks")
+    tags = models.ManyToManyField("Tag", verbose_name=_("Tags"), related_name="tasks")
     status = models.CharField(choices=Status, default=Status.NEW, max_length=20, verbose_name=_("Status"))
     deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
@@ -122,4 +137,14 @@ class Category(models.Model):
         """Вернуть имя категории."""
 
         return self.name
+
+class Tag(models.Model):
+    name = models.CharField(max_length=80, unique=True, verbose_name=_("Tag"))
+
+    class Meta:
+        db_table = "task_manager_tag"
+        verbose_name = _("Tag")
+        verbose_name_plural = _("Tags")
+        constraints = [models.UniqueConstraint(fields=["name"], name="unique_tag"),]
+
 

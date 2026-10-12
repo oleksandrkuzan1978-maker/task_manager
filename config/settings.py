@@ -5,7 +5,6 @@ SECRET_KEY и DEBUG читаются через django-environ. Настраив
 промежуточные обработчики запросов, шаблоны, SQLite, локализацию
 и пути к статическим и загружаемым файлам.
 """
-from logging import DEBUG
 from pathlib import Path
 import environ
 import os
