@@ -43,7 +43,6 @@ class SubTaskAdmin(admin.ModelAdmin):
 
     list_display = ('title', 'task', 'status', 'created_at', 'deadline')
     search_fields = ('title', 'task__title')
-    ordering = ('-created_at', 'task')
     fields = ('title', 'task', 'status', 'description', 'deadline')
     list_per_page = 10
 
