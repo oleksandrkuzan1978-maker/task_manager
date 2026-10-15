@@ -55,6 +55,14 @@ class Task(models.Model):
     deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
+    # {
+    #     "title": "Подготовить отчёт",
+    #     "description": "Собрать данные и подготовить итоговый отчёт",
+    #     "categories": [1, 2],
+    #     "tags": [1, 3],
+    #     "deadline": "2026-10-20T18:00:00+02:00"
+    # }
+
     class Meta:
         db_table = "task_manager_task"
         ordering = ["-created_at"]

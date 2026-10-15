@@ -4,11 +4,12 @@ from datetime import timedelta
 from django.utils import timezone
 
 import django
+from django.utils.autoreload import is_django_path
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from apps.task.models import Task, Category, Status, SubTask
+from apps.task.models import Task, Category, Status, SubTask, Tag
 
 #Task:
 # title: "Prepare presentation".

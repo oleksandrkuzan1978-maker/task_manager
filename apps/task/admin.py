@@ -1,7 +1,7 @@
 """Регистрация моделей задач, подзадач и категорий в админке Django."""
 
 from django.contrib import admin
-from .models import Task, SubTask, Category, Status
+from .models import Task, SubTask, Category, Status, Tag
 from django.utils import timezone
 from django.contrib import messages
 from django.utils.formats import date_format
@@ -26,7 +26,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ('short_title', 'status', 'created_at', 'deadline')
     search_fields = ('title',)
     ordering = ('-created_at',)
-    fields = ('title', 'status', 'description', 'deadline')
+    fields = ('title', 'status','categories', 'tags', 'description', 'deadline')
     list_per_page = 10
 
     inlines = [SubTaskInline]
@@ -75,6 +75,12 @@ class SubTaskAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     """Отображать имя категории в списке админки."""
 
+    list_display = ('name',)
+    search_fields = ('name',)
+    fields = ('name',)
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     fields = ('name',)
