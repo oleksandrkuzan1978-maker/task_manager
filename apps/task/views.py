@@ -3,15 +3,17 @@
 Представления пока не реализованы.
 """
 from django.db import OperationalError
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Count, Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-from .models import Task, Status
-from .serializers import TaskSerializer
+
+
+from .models import Task, Status, Category
+from .serializers import TaskSerializer, CategoryCreateSerializer
 
 
 # Create your views here.
@@ -78,3 +80,12 @@ def get_task_count(request):
                      count_tasks_of_status,
                      count_overdue_tasks],
                     status=status.HTTP_200_OK)
+
+
+@api_view(['PATCH'])
+def update_category(request, id):
+    category = get_object_or_404(Category, id=id)
+    serializer = CategoryCreateSerializer(category, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

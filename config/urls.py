@@ -12,4 +12,5 @@ urlpatterns = [
     path('tasks/',views.get_all_tasks, name="get_all_tasks"),
     path('tasks/<int:id>/', views.get_one_task, name="get_one_task"),
     path('tasks/aggregate/', views.get_task_count, name="get_task_count"),
+    path('cat/<int:id>/', views.update_category, name="update_category"),
 ]
