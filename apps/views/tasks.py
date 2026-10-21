@@ -1,3 +1,4 @@
+"""Представления списка задач, отдельной задачи и сводной статистики."""
 from django.db import OperationalError
 from django.utils import timezone
 from django.db.models import Count
@@ -7,13 +8,14 @@ from rest_framework import status
 
 
 from apps.task.models import Task, Status
-from apps.task.serializers import (TaskSerializer, TaskDetailSerializer,)
+from apps.task.serializers import (TaskCreateSerializer, TaskSerializer, TaskDetailSerializer,)
 
 
 class TaskGetAllCreateAPIView(APIView):
-    def past(self, request):
-        """представление для создания новой задачи."""
-        serializer = TaskSerializer(data=request.data)
+    """Список задач и метод создания past, не подключённый к HTTP POST."""
+    def post(self, request):
+        """Проверить входные данные и создать задачу; имя past не является обработчиком POST."""
+        serializer = TaskCreateSerializer(data=request.data)
         print(request, request.data)
         if serializer.is_valid():
             serializer.save()
@@ -22,7 +24,7 @@ class TaskGetAllCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        """ Представление для получения списка задач"""
+        """Вернуть задачи по идентификатору или ответ 404, если список пуст."""
         tasks = Task.objects.all().order_by("id")
         if tasks.exists():
             serializer = TaskSerializer(tasks, many=True)
@@ -32,6 +34,7 @@ class TaskGetAllCreateAPIView(APIView):
 
 
 class TaskDetailAPIView(APIView):
+    """Получение отдельной задачи со связанными подзадачами."""
     def get(self, request, id):
         """Представление для получения конкретной задачи."""
         try:
@@ -44,9 +47,9 @@ class TaskDetailAPIView(APIView):
 
 class TaskAggregateAPIView(APIView):
 
+    """Получение общего количества задач, распределения по статусам и числа просроченных задач."""
     def get(self, request):
-        """ Представление для получения общего количества задач, количества задач по каждому статусу
-        и количества просроченных задач."""
+        """Посчитать задачи и просроченные задачи без DONE; обработать доступные в try ошибки OperationalError."""
         try:
             #получение общего количества задач
             total_count_tasks = Task.objects.aggregate(total_count_of_tasks=Count('id'))

@@ -5,14 +5,7 @@ import sys
 
 
 def main():
-    """Выполнить команду Django, переданную в аргументах командной строки.
-
-    Использует config.settings, если DJANGO_SETTINGS_MODULE не задан
-    в окружении, и передает sys.argv диспетчеру команд Django.
-
-    Raises:
-        ImportError: Если не удалось импортировать диспетчер команд Django.
-    """
+    """Выполнить административную команду Django с настройками config.settings по умолчанию."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
     try:
         from django.core.management import execute_from_command_line

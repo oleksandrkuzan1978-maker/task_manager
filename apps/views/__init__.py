@@ -1,3 +1,4 @@
+"""Общий интерфейс импорта представлений задач, категорий, подзадач и главной страницы."""
 from .tasks import (
     TaskGetAllCreateAPIView,
     TaskDetailAPIView,

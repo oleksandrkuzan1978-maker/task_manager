@@ -1,3 +1,4 @@
+"""Команда создания тестовых задач, подзадач и категорий с необязательной очисткой."""
 import random
 from datetime import timedelta
 
@@ -12,9 +13,11 @@ faker = Faker('ru_RU')
 
 
 class Command(BaseCommand):
+    """Команда заполнения базы тестовыми задачами, подзадачами и категориями."""
     help = 'Заполняет базу тестовыми данными'
 
     def add_arguments(self, parser):
+        """Добавить флаг --clear для очистки данных перед заполнением."""
         parser.add_argument('--clear', action='store_true'
                             , help='Удалить старые данные перед заполнением')
 

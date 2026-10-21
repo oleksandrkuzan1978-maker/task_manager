@@ -1,3 +1,4 @@
+"""Представления создания и частичного обновления категорий."""
 from django.db import OperationalError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,10 +11,11 @@ from apps.task.models import Category
 from apps.task.serializers import CategoryCreateSerializer
 
 class CategoryGetAllCreateAPIView(APIView):
-    def past(self, request):
-        """представление для создания новой категории."""
+    """Метод создания категории past, не подключённый к HTTP POST; обработчик GET отсутствует."""
+    def post(self, request):
+        """Проверить имя и создать категорию; имя past не является обработчиком POST."""
         serializer = CategoryCreateSerializer(data=request.data)
-        print(request, request.data)
+        #print(request, request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -22,7 +24,9 @@ class CategoryGetAllCreateAPIView(APIView):
 
 
 class CategoryDetailAPIView(APIView):
+    """Частичное обновление имени существующей категории."""
     def patch(self, request, id):
+        """Найти категорию, проверить входные данные и сохранить частичное обновление."""
         category = get_object_or_404(Category, id=id)
         serializer = CategoryCreateSerializer(category, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

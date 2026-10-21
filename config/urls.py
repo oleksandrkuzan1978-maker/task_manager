@@ -1,10 +1,7 @@
-"""Корневые маршруты проекта.
-
-Список urlpatterns подключает административный интерфейс по пути admin/.
-"""
+"""Маршруты главной страницы, админки и API задач, статистики, категорий и подзадач."""
 from django.contrib import admin
 from django.urls import path
-from apps.task import views
+from apps import views
 
 urlpatterns = [
     path('', views.index, name='index'),

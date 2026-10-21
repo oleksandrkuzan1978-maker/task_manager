@@ -1,4 +1,4 @@
-"""Регистрация моделей задач, подзадач и категорий в админке Django."""
+"""Административный интерфейс задач, подзадач, категорий и тегов."""
 
 from django.contrib import admin
 from .models import Task, SubTask, Category, Status, Tag
@@ -14,6 +14,7 @@ from django.utils.formats import date_format
 # admin.site.register(Category)
 
 class SubTaskInline(admin.TabularInline):
+    """Редактирование подзадач в табличном блоке формы родительской задачи."""
     model = SubTask
     fields = ('title', 'status', 'description', 'deadline')
     show_change_link = True
@@ -21,7 +22,7 @@ class SubTaskInline(admin.TabularInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    """Отображать название и время создания задачи в списке админки."""
+    """Настройки списка, поиска и редактирования задач с категориями, тегами и подзадачами."""
 
     list_display = ('short_title', 'status', 'created_at', 'deadline')
     search_fields = ('title',)
@@ -39,7 +40,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(SubTask)
 class SubTaskAdmin(admin.ModelAdmin):
-    """Отображать название и время создания подзадачи в списке админки."""
+    """Настройки списка, поиска и редактирования подзадач и массовой смены статуса."""
 
     list_display = ('title', 'task', 'status', 'created_at', 'deadline')
     search_fields = ('title', 'task__title')
@@ -81,6 +82,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    """Настройки списка, поиска и редактирования тегов в админке."""
     list_display = ('name',)
     search_fields = ('name',)
     fields = ('name',)

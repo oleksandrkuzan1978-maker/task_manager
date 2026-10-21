@@ -1,4 +1,4 @@
-"""Модели задач, подзадач и категорий и общие варианты статуса."""
+"""Модели проектов, задач, подзадач, категорий и тегов и варианты статуса."""
 
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
@@ -17,10 +17,12 @@ class Status(models.TextChoices):
     DONE = "done", _("Done")
 
 class Project(models.Model):
+    """Проект с уникальным названием, описанием и автоматически заданным временем создания."""
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Project name"))
     description = models.TextField(verbose_name=_("Description"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     class Meta:
+        """Метаданные и ограничения модели Project."""
         db_table = "project_manager_project"
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
@@ -28,21 +30,8 @@ class Project(models.Model):
 
 
 class Task(models.Model):
-    """Задача с категориями, статусом и необязательным сроком выполнения.
-
-    Проверка модели требует уникальности названия в пределах даты
-    created_at через unique_for_date; это не ограничение базы данных.
-    Описание может быть пустым, срок — отсутствовать. Время создания
-    заполняется автоматически при первом сохранении.
-
-    Attributes:
-        title: Название длиной до 80 символов.
-        description: Текстовое описание задачи.
-        categories: Связь многие-ко-многим с категориями.
-        status: Значение Status; по умолчанию NEW.
-        deadline: Срок выполнения или None.
-        created_at: Дата и время создания записи.
-    """
+    """Задача с категориями, тегами, статусом и необязательным сроком выполнения.
+    Уникальность названия за дату создания проверяется моделью и ограничением базы данных."""
 
     title = models.CharField(max_length=80
                              , unique_for_date='created_at'
@@ -64,6 +53,7 @@ class Task(models.Model):
     # }
 
     class Meta:
+        """Метаданные и ограничения модели Task."""
         db_table = "task_manager_task"
         ordering = ["-created_at"]
         verbose_name = _("Task")
@@ -83,20 +73,8 @@ class Task(models.Model):
 
 
 class SubTask(models.Model):
-    """Подзадача, принадлежащая одной задаче.
-
-    Удаляется каскадно при удалении родительской задачи. Доступна
-    через обратную связь Task.subtasks. Описание может быть пустым,
-    а срок выполнения — отсутствовать.
-
-    Attributes:
-        title: Название длиной до 80 символов.
-        description: Текстовое описание подзадачи.
-        task: Родительская задача.
-        status: Значение Status; по умолчанию NEW.
-        deadline: Срок выполнения или None.
-        created_at: Время создания, заполняемое при первом сохранении.
-    """
+    """Подзадача со статусом и необязательным сроком, связанная с одной задачей.
+    Удаляется каскадно при удалении родительской задачи."""
 
     title = models.CharField(max_length=80, verbose_name=_("SubTask"))
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
@@ -111,6 +89,7 @@ class SubTask(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
     class Meta:
+        """Метаданные и ограничения модели SubTask."""
         db_table = "task_manager_subtask"
         ordering = ["-created_at"]
         verbose_name = _("Subtask")
@@ -127,15 +106,12 @@ class SubTask(models.Model):
 
 
 class Category(models.Model):
-    """Категория для группировки задач.
-
-    Attributes:
-        name: Имя длиной до 80 символов; по умолчанию Other.
-    """
+    """Категория задач с уникальным именем и значением Other по умолчанию."""
 
     name = models.CharField(max_length=80, default="Other", unique=True, verbose_name=_("Category"))
 
     class Meta:
+        """Метаданные и ограничения модели Category."""
         db_table = "task_manager_category"
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
@@ -147,9 +123,11 @@ class Category(models.Model):
         return self.name
 
 class Tag(models.Model):
+    """Тег с уникальным именем для связи с задачами."""
     name = models.CharField(max_length=80, unique=True, verbose_name=_("Tag"))
 
     class Meta:
+        """Метаданные и ограничения модели Tag."""
         db_table = "task_manager_tag"
         verbose_name = _("Tag")
         verbose_name_plural = _("Tags")

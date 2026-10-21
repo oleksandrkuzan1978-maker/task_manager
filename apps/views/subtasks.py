@@ -1,3 +1,4 @@
+"""Представления создания, списка, просмотра, изменения и удаления подзадач задачи."""
 
 from django.shortcuts import get_object_or_404
 
@@ -8,21 +9,10 @@ from rest_framework import status
 from apps.task.models import Task
 from apps.task.serializers import SubTaskCreateSerializer
 
-
-# Задание 5: Создание классов представлений
-# Создайте классы представлений для работы с подзадачами (SubTasks),
-# включая создание, получение, обновление и удаление подзадач.
-# Используйте классы представлений (APIView) для реализации этого функционала.
-# Шаги для выполнения:
-# Создайте классы представлений для создания
-# и получения списка подзадач (SubTaskListCreateView).
-# Создайте классы представлений для получения, обновления
-# и удаления подзадач (SubTaskDetailUpdateDeleteView).
-# Добавьте маршруты в файле urls.py, чтобы использовать эти классы.
-
 class SubTaskListCreateAPIView(APIView):
+    """Создание подзадачи и получение списка подзадач указанной задачи."""
     def post(self, request, id):
-        """представление для создания новой подзадачи."""
+        """Проверить входные данные и сохранить подзадачу для задачи из URL."""
 
         task = get_object_or_404(Task, id=id)
 
@@ -35,6 +25,7 @@ class SubTaskListCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, id):
+        """Вернуть подзадачи по идентификатору или ответ 404, если список пуст."""
         task = get_object_or_404(Task, id=id)
 
         subtasks = task.subtasks.order_by("id")
@@ -46,7 +37,10 @@ class SubTaskListCreateAPIView(APIView):
 
 
 class SubTaskDetailUpdateDeleteView(APIView):
+    """Просмотр, частичное обновление и удаление подзадачи указанной задачи."""
+        
     def get(self, request, id, sub_id):
+        """Вернуть подзадачу, проверив её принадлежность указанной задаче."""
         task=get_object_or_404(Task, id=id)
         subtask=get_object_or_404(task.subtasks, id=sub_id)
         serializer = SubTaskCreateSerializer(subtask)
@@ -55,6 +49,7 @@ class SubTaskDetailUpdateDeleteView(APIView):
             status=status.HTTP_200_OK,
         )
     def patch(self, request, id, sub_id):
+        """Проверить и частично обновить подзадачу указанной задачи."""
         task = get_object_or_404(Task, id=id)
         subtask = get_object_or_404(task.subtasks, id=sub_id)
         serializer = SubTaskCreateSerializer(subtask, data=request.data, partial=True)
@@ -63,6 +58,7 @@ class SubTaskDetailUpdateDeleteView(APIView):
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
     def delete(self, request, id, sub_id):
+        """Удалить подзадачу указанной задачи и вернуть ответ 204 без тела."""
         task = get_object_or_404(Task, id=id)
         subtask = get_object_or_404(task.subtasks, id=sub_id)
         subtask.delete()
