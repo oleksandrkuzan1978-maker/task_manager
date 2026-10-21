@@ -21,23 +21,23 @@ from apps.task.models import Task, Category, Status, SubTask, Tag
 # category = get_object_or_404(Category, pk=4)
 # print(category)
 
-# #Task:
-# # title: "Prepare presentation".
-# # description: "Prepare materials and slides for the presentation".
-# # status: "New".
-# # deadline: Today's date + 3 days.
-# try:
-#     task = Task.objects.get(title="Prepare presentation")
-#     task.delete()
-# except Task.DoesNotExist:
-#     print(f'Создаем новую запись в таблице {Task._meta.db_table}:')
-#
-# task = Task.objects.create(
-#     title='Prepare presentation',
-#     description='Prepare materials and slides for the presentation',
-#     status=Status.NEW,
-#     deadline=timezone.now() + timedelta(days=3),
-# )
+#Task:
+# title: "Prepare presentation".
+# description: "Prepare materials and slides for the presentation".
+# status: "New".
+# deadline: Today's date + 3 days.
+try:
+    task = Task.objects.get(title="Prepare presentation")
+    task.delete()
+except Task.DoesNotExist:
+    print(f'Создаем новую запись в таблице {Task._meta.db_table}:')
+
+task = Task.objects.create(
+    title='Prepare presentation',
+    description='Prepare materials and slides for the presentation',
+    status=Status.NEW,
+    deadline=timezone.now() + timedelta(days=3),
+)
 # cat = Category.objects.get(name='Работа')
 # task.categories.add(cat)
 # # проверяем внесение категории в запись задачи
@@ -75,12 +75,12 @@ from apps.task.models import Task, Category, Status, SubTask, Tag
 #     task=task
 # )
 #
-# # Чтение записей:
-# # Tasks со статусом "New":
-# # Вывести все задачи, у которых статус "New".
-# # SubTasks с просроченным статусом "Done":
-# # Вывести все подзадачи, у которых статус "Done", но срок выполнения истек.
-#
+# Чтение записей:
+# Tasks со статусом "New":
+# Вывести все задачи, у которых статус "New".
+# SubTasks с просроченным статусом "Done":
+# Вывести все подзадачи, у которых статус "Done", но срок выполнения истек.
+
 # status = Status.DONE
 # subtask_done = SubTask.objects.filter(status=status, deadline__lt=timezone.now())
 # print(f"Список подзадач задачи {task.title}, которые имеют статус {status}:")
