@@ -24,7 +24,7 @@ class TaskGetAllCreateAPIView(APIView):
 
     def get(self, request):
         """Вернуть задачи по идентификатору или ответ 404, если список пуст."""
-        tasks = Task.objects.all().order_by("id")
+        tasks = Task.objects.all().prefetch_related("categories", 'tags').order_by("id")
         if tasks.exists():
             serializer = TaskSerializer(tasks, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
