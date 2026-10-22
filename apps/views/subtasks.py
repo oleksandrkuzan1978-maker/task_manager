@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from apps.task.models import Task
-from apps.task.serializers import SubTaskCreateSerializer
+from apps.serializers.subtasks import SubTaskCreateSerializer, SubTaskSerializer
 
 class SubTaskListCreateAPIView(APIView):
     """Создание подзадачи и получение списка подзадач указанной задачи."""
@@ -30,7 +30,7 @@ class SubTaskListCreateAPIView(APIView):
 
         subtasks = task.subtasks.order_by("id")
         if subtasks.exists():
-            serializer = SubTaskCreateSerializer(subtasks, many=True)
+            serializer = SubTaskSerializer(subtasks, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"SubTasks": "SubTasks not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -43,7 +43,7 @@ class SubTaskDetailUpdateDeleteView(APIView):
         """Вернуть подзадачу, проверив её принадлежность указанной задаче."""
         task=get_object_or_404(Task, id=id)
         subtask=get_object_or_404(task.subtasks, id=sub_id)
-        serializer = SubTaskCreateSerializer(subtask)
+        serializer = SubTaskSerializer(subtask)
         return Response(
             serializer.data,
             status=status.HTTP_200_OK,
@@ -52,10 +52,11 @@ class SubTaskDetailUpdateDeleteView(APIView):
         """Проверить и частично обновить подзадачу указанной задачи."""
         task = get_object_or_404(Task, id=id)
         subtask = get_object_or_404(task.subtasks, id=sub_id)
+
         serializer = SubTaskCreateSerializer(subtask, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, id, sub_id):
         """Удалить подзадачу указанной задачи и вернуть ответ 204 без тела."""

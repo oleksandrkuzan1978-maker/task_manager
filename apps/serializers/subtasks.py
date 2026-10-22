@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.task.models import Task, SubTask
+from apps.task.models import SubTask
 
 
 class SubTaskCreateSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации SubTaskCreateSerializer."""
         model = SubTask
         fields = '__all__'
-        read_only_fields = ('id', 'created_at',)
+        read_only_fields = ('id', 'created_at', "task")
 
 
 class SubTaskSerializer(serializers.ModelSerializer):
@@ -20,12 +20,3 @@ class SubTaskSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class TaskDetailSerializer(serializers.ModelSerializer):
-
-    """Сериализатор всех полей задачи с полными данными связанных подзадач только для чтения."""
-    subtasks = SubTaskSerializer(many=True, read_only=True)
-    class Meta:
-        """Поля и параметры сериализации TaskDetailSerializer."""
-        model = Task
-        fields = '__all__'
-        read_only_fields = ('id', 'created_at',)

@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 from apps.task.models import Task
-
+from .subtasks import SubTaskSerializer
 
 class TaskSerializer(serializers.ModelSerializer):
 
@@ -29,3 +29,12 @@ class TaskCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("deadline must be greater than now")
         return value
 
+class TaskDetailSerializer(serializers.ModelSerializer):
+
+    """Сериализатор всех полей задачи с полными данными связанных подзадач только для чтения."""
+    subtasks = SubTaskSerializer(many=True, read_only=True)
+    class Meta:
+        """Поля и параметры сериализации TaskDetailSerializer."""
+        model = Task
+        fields = '__all__'
+        read_only_fields = ('id', 'created_at',)

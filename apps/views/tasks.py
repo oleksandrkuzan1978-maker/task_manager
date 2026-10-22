@@ -6,9 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-
 from apps.task.models import Task, Status
-from apps.task.serializers import (TaskCreateSerializer, TaskSerializer, TaskDetailSerializer,)
+from apps.serializers.tasks import (TaskCreateSerializer, TaskSerializer, TaskDetailSerializer)
 
 
 class TaskGetAllCreateAPIView(APIView):
@@ -55,7 +54,7 @@ class TaskAggregateAPIView(APIView):
             total_count_tasks = Task.objects.aggregate(total_count_of_tasks=Count('id'))
 
             #получение количества задач по каждому статусу
-            count_tasks_of_status = Task.objects.values('status').annotate(count_tasks_of_status=Count('id'))
+            count_tasks_of_status = list(Task.objects.values('status').annotate(count_tasks_of_status=Count('id')))
 
             #получение количества просроченных задач
             # count_overdue_tasks = Task.objects.filter((~Q(status=Status.DONE) | Q(deadline=None))

@@ -1,14 +1,10 @@
 """Представления создания и частичного обновления категорий."""
-from django.db import OperationalError
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
 from apps.task.models import Category
-from apps.task.serializers import CategoryCreateSerializer
+from apps.serializers.categories import CategoryCreateSerializer
 
 class CategoryGetAllCreateAPIView(APIView):
     """Метод создания категории past, не подключённый к HTTP POST; обработчик GET отсутствует."""
@@ -21,6 +17,11 @@ class CategoryGetAllCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        categories = Category.objects.order_by("id")
+        serializer = CategoryCreateSerializer(categories, many=True)
+        return Response(serializer.data)
 
 
 class CategoryDetailAPIView(APIView):
