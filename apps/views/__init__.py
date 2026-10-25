@@ -14,3 +14,4 @@ from .categories import (
 )
 
 from .index import index
+from .variables import *

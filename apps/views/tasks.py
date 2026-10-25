@@ -5,10 +5,9 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
 from apps.task.models import Task, Status
 from apps.serializers.tasks import (TaskCreateSerializer, TaskSerializer, TaskDetailSerializer)
-
+from .variables import weekdays, message_response_weekday
 
 class TaskGetAllCreateAPIView(APIView):
     """Список задач и метод создания past, не подключённый к HTTP POST."""
@@ -23,13 +22,32 @@ class TaskGetAllCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        """Вернуть задачи по идентификатору или ответ 404, если список пуст."""
-        tasks = Task.objects.all().prefetch_related("categories", 'tags').order_by("id")
-        if tasks.exists():
-            serializer = TaskSerializer(tasks, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        """Вернуть задачи по идентификатору, или ответ 404, если список пуст.
+        Предусмотрена возможность вывода списка задач по дню недели,
+        в который были созданы задачи.
+        Название дня недели вводится как параметр запроса."""
+        weekday = request.query_params.get('weekday').strip().lower()
+        if weekday:
+            if weekday not in weekdays:
+                return Response({"weekday": message_response_weekday},
+                                status=status.HTTP_400_BAD_REQUEST, )
+            tasks_by_weekday = (Task.objects.prefetch_related("categories", 'tags')
+                                .filter(created_at__week_day=weekdays[weekday])
+                                .order_by("id"))
+            if tasks_by_weekday.exists():
+                serializer = TaskSerializer(tasks_by_weekday, many=True)
+                return Response({"Task creation day":weekday
+                                    , "tasks":serializer.data}
+                                , status=status.HTTP_200_OK)
+            return Response({f"Tasks by {weekday}": "Tasks not found"}
+                            , status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"error": "Tasks not found"}, status=status.HTTP_404_NOT_FOUND)
+            all_tasks = Task.objects.all().prefetch_related("categories", 'tags').order_by("id")
+            if all_tasks.exists():
+                serializer = TaskSerializer(all_tasks, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Tasks not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class TaskDetailAPIView(APIView):
@@ -71,3 +89,4 @@ class TaskAggregateAPIView(APIView):
                          count_tasks_of_status,
                          count_overdue_tasks],
                         status=status.HTTP_200_OK)
+

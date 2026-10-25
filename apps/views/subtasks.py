@@ -1,7 +1,7 @@
 """Представления создания, списка, просмотра, изменения и удаления подзадач задачи."""
 
 from django.shortcuts import get_object_or_404
-
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,13 +25,19 @@ class SubTaskListCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, id):
-        """Вернуть подзадачи по идентификатору или ответ 404, если список пуст."""
-        task = get_object_or_404(Task, id=id)
+        """Вернуть подзадачи от новых к старым, не более пяти на странице."""
+        task = get_object_or_404(Task, pk=id)
 
-        subtasks = task.subtasks.order_by("id")
+        subtasks = task.subtasks.order_by("-created_at", "-id")
         if subtasks.exists():
-            serializer = SubTaskSerializer(subtasks, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            paginator = PageNumberPagination() # создаем пагинатор
+            paginator.page_size = 5 # задаем размер страницы (пять подзадач на странице)
+
+            page = paginator.paginate_queryset(subtasks, request) #получаем только нужную страницу
+                                                                  # (номер страницы берется из параметра page в URL)
+            serializer = SubTaskSerializer(page, many=True)
+
+            return paginator.get_paginated_response(serializer.data)
         else:
             return Response({"SubTasks": "SubTasks not found"}, status=status.HTTP_404_NOT_FOUND)
 

@@ -1,14 +1,9 @@
 """Учебные ORM-запросы; при запуске или импорте пересоздаёт задачу Prepare presentation."""
 import os
 from datetime import timedelta
-from django.shortcuts import render, get_object_or_404
-from django.contrib.syndication.views import add_domain
-from django.core.validators import validate_email, validate_domain_name
 from django.utils import timezone
 
 import django
-from django.utils.autoreload import is_django_path
-from unicodedata import category
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
