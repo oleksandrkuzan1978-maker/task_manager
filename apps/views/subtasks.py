@@ -17,6 +17,7 @@ def paginator(pages, request, name_pages):
         paginator.page_size = 5  # задаем размер страницы (пять подзадач на странице)
 
         page = paginator.paginate_queryset(pages, request)  # получаем только нужную страницу
+
         # (номер страницы берется из параметра page в URL)
         serializer = SubTaskSerializer(page, many=True)
 
@@ -25,6 +26,26 @@ def paginator(pages, request, name_pages):
         return Response({f"{name_pages}": f"{name_pages} not found"}, status=status.HTTP_404_NOT_FOUND)
         #return Response({"Error": "Objects not found"}, status=status.HTTP_404_NOT_FOUND)
 
+class SubtaskGetByParamAPIView(APIView):
+    """Список подзадач с фильтрами по названию задачи и статусу."""
+    def get(self, request):
+        """Вернуть подзадачи от новых к старым, по пять на странице."""
+        title = request.query_params.get("title", "").strip()
+        status_ = request.query_params.get("status", "").strip()
+
+        subtasks = SubTask.objects.select_related("task")
+
+        if title:
+            subtasks = subtasks.filter(task__title__icontains=title)
+        if status_:
+            subtasks = subtasks.filter(status__icontains=status_)
+
+        subtasks = subtasks.order_by("-created_at", "-id")
+
+        return paginator(subtasks, request, "Subtasks")
+
+
+# "Тест a3cd1b3214a74480ba9372c901c46857: Житель вперед выкинуть."
 
 class SubTaskListCreateAPIView(APIView):
     """Создание подзадачи и получение списка подзадач указанной задачи."""
@@ -42,56 +63,16 @@ class SubTaskListCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, id):
-        """Вернуть подзадачи от новых к старым, не более пяти на странице."""
-        # def paginator(subtasks):
-        #     if subtasks.exists():
-        #         paginator = PageNumberPagination() # создаем пагинатор
-        #         paginator.page_size = 5 # задаем размер страницы (пять подзадач на странице)
-        #
-        #         page = paginator.paginate_queryset(subtasks, request) #получаем только нужную страницу
-        #                                                               # (номер страницы берется из параметра page в URL)
-        #         serializer = SubTaskSerializer(page, many=True)
-        #
-        #         return paginator.get_paginated_response(serializer.data)
-        #     else:
-        #         return Response({"SubTasks": "SubTasks not found"}, status=status.HTTP_404_NOT_FOUND)
+        task = get_object_or_404(Task, id=id)
 
-        task = get_object_or_404(Task, pk=id)
-
-        title = request.query_params.get('title', "").strip()
-        status = request.query_params.get('status', "").strip()
-
-        #Если параметров нет
-        if title is None and status is None:
-
-            subtasks = task.subtasks.order_by("-created_at", "-id")
-
-            return paginator(subtasks, request, "SubTasks")
-
-        elif title and status:
-            task_by_title = get_object_or_404(Task, title__icontains=title)
-
-            subtasks_by_status = (task_by_title.subtasks
-                                  .filter(status__icontains=status)
-                                  .order_by("-created_at", "-id"))
-            return paginator(subtasks_by_status, request, "Subtasks")
-
-        elif title:
-            task_by_title = get_object_or_404(Task, title__icontains=title)
-
-            return paginator(task_by_title.subtasks.order_by("-created_at", "-id")
-                             , request, "SubTasks")
-
-        elif status:
-            subtasks_by_status = (task.subtasks
-                                  .filter(status__icontains=status)
-                                  .order_by("-created_at", "-id"))
-            return paginator(subtasks_by_status, request, "Subtasks")
+        subtasks = task.subtasks.order_by("id")
+        if subtasks.exists():
+            serializer = SubTaskCreateSerializer(subtasks, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"SubTasks": "SubTasks not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-
-
-# "Тест a3cd1b3214a74480ba9372c901c46857: Житель вперед выкинуть."
 class SubTaskDetailUpdateDeleteView(APIView):
     """Просмотр, частичное обновление и удаление подзадачи указанной задачи."""
         

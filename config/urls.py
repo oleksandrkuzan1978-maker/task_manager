@@ -14,6 +14,7 @@ urlpatterns = [
     path('task/<int:id>/subtasks/', views.SubTaskListCreateAPIView.as_view(), name="subtask_list_create"),
     path('task/<int:id>/subtasks/<int:sub_id>/', views.SubTaskDetailUpdateDeleteView.as_view()
          , name="subtask_detail_update_delete"),
+    path('subtasks/', views.SubtaskGetByParamAPIView.as_view(), name="subtask_get_by_param"),
 ]
 
 
