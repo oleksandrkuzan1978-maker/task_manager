@@ -8,6 +8,60 @@ from rest_framework import status
 
 from apps.task.models import Task, SubTask
 from apps.serializers.subtasks import SubTaskCreateSerializer, SubTaskSerializer
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+
+from orm_requests import task
+
+
+class SubTaskListCreateAPIView(ListCreateAPIView):
+    """Получение списка подзадач и создание подзадач указанной задачи."""
+    queryset = SubTask.objects.select_related("task")
+
+    # Фильтрация по полям
+    filterset_fields = {"status": ["exact"],
+                        "deadline": ["exact", "date"],}
+    # Поиск по полям
+    search_fields = ["title", "description"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(task_id=self.kwargs["id"],)
+
+    # def get_queryset(self):
+    #     task_ = get_object_or_404(Task, pk=self.kwargs["id"])
+    #     return super().get_queryset().filter(task=task_)
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return SubTaskCreateSerializer
+        return SubTaskSerializer
+
+    def perform_create(self, serializer):
+        task = get_object_or_404(Task, pk=self.kwargs["id"])
+        serializer.save(task=task)
+
+
+class SubTaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Просмотр, обновление и удаление подзадачи указанной задачи."""
+    queryset = SubTask.objects.select_related("task")
+
+    lookup_url_kwarg = "sub_id"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(task_id=self.kwargs["id"],)
+
+    def get_serializer_class(self):
+        if self.request.method == "PATCH":
+            return SubTaskCreateSerializer
+        return SubTaskSerializer
+
+
+
+
+
+
+
 
 
 def paginator(pages, request, name_pages):
@@ -47,7 +101,7 @@ class SubtaskGetByParamAPIView(APIView):
 
 # "Тест a3cd1b3214a74480ba9372c901c46857: Житель вперед выкинуть."
 
-class SubTaskListCreateAPIView(APIView):
+class SubTaskGetAllCreateAPIView(APIView):
     """Создание подзадачи и получение списка подзадач указанной задачи."""
     def post(self, request, id):
         """Проверить входные данные и сохранить подзадачу для задачи из URL."""

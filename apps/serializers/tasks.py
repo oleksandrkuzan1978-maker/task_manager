@@ -37,4 +37,4 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации TaskDetailSerializer."""
         model = Task
         fields = '__all__'
-        read_only_fields = ('id', 'created_at',)
+        read_only_fields = ('id', 'created_at')

@@ -3,11 +3,15 @@ from .tasks import (
     TaskGetAllCreateAPIView,
     TaskDetailAPIView,
     TaskAggregateAPIView,
+    TaskListCreateAPIView,
+    TaskRetrieveUpdateDestroyAPIView,
 )
 from .subtasks import  (
-    SubTaskListCreateAPIView,
+    SubTaskGetAllCreateAPIView,
     SubTaskDetailUpdateDeleteView,
-    SubtaskGetByParamAPIView
+    SubtaskGetByParamAPIView,
+    SubTaskListCreateAPIView,
+    SubTaskRetrieveUpdateDestroyAPIView,
 )
 from .categories import (
     CategoryDetailAPIView,

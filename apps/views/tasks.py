@@ -2,12 +2,62 @@
 from django.db import OperationalError
 from django.utils import timezone
 from django.db.models import Count
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
 from apps.task.models import Task, Status
 from apps.serializers.tasks import (TaskCreateSerializer, TaskSerializer, TaskDetailSerializer)
+
 from .variables import weekdays, message_response_weekday
+
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+# from django_filters.rest_framework import DjangoFilterBackend
+# from rest_framework.filters import SearchFilter, OrderingFilter
+
+class TaskListCreateAPIView(ListCreateAPIView):
+    """Получение списка задач и создание новой задачи."""
+    queryset = Task.objects.prefetch_related("categories", "tags")
+    #serializer_class = TaskCreateSerializer
+    # Получаем фильтрацию, поиск и сортировку.
+    #filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    # Фильтрация по полям; status - точное совпадение; deadline - точное время или календарная дата.
+    filterset_fields = {"status": ["exact"],
+                        "deadline": ["exact", "date"],}
+    # Поиск по полям
+    search_fields = ["title", "description"]
+
+    # Поля, по которым клиенту разрешено сортировать задачи.
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TaskCreateSerializer
+        return TaskSerializer
+
+
+class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Получение, обновление и удаление отдельной задачи."""
+    queryset = Task.objects.prefetch_related("categories", "tags", "subtasks",)
+    #serializer_class = TaskSerializer
+
+    #В существующем маршруте используется <int:id>
+    lookup_url_kwarg = "id"
+
+    def get_serializer_class(self):
+        if self.request.method == "PATCH":
+            return TaskCreateSerializer
+        return TaskDetailSerializer
+
+
+
+
+
+
+
 
 class TaskGetAllCreateAPIView(APIView):
     """Список задач и метод создания past, не подключённый к HTTP POST."""
