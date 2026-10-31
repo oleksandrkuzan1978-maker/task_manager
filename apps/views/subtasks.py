@@ -38,8 +38,8 @@ class SubTaskListCreateAPIView(ListCreateAPIView):
         return SubTaskSerializer
 
     def perform_create(self, serializer):
-        task = get_object_or_404(Task, pk=self.kwargs["id"])
-        serializer.save(task=task)
+        task_ = get_object_or_404(Task, pk=self.kwargs["id"])
+        serializer.save(task=task_)
 
 
 class SubTaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
