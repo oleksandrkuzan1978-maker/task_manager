@@ -3,8 +3,22 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from unicodedata import category
+
 from apps.task.models import Category
 from apps.serializers.categories import CategoryCreateSerializer
+from rest_framework import viewsets
+from rest_framework.decorators import action
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.order_by("id")
+    serializer_class = CategoryCreateSerializer
+    @action(detail=True, methods=['get'])
+    def count_tasks(self, request, pk=None):
+        category = self.get_object()
+        return Response({"id": category.pk,
+                         "name": category.name,
+                         "tasks_count": category.tasks.count(),})
 
 class CategoryGetAllCreateAPIView(APIView):
     """Метод создания категории past, не подключённый к HTTP POST; обработчик GET отсутствует."""

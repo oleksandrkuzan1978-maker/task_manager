@@ -1,7 +1,11 @@
 """Маршруты главной страницы, админки и API задач, статистики, категорий и подзадач."""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from apps import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'categories', views.CategoryViewSet, basename="category")
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -11,6 +15,9 @@ urlpatterns = [
     path('tasks/aggregate/', views.TaskAggregateAPIView.as_view(), name="task_aggregate"),
     path('category/', views.CategoryGetAllCreateAPIView.as_view(), name="category_get_all_create"),
     path('category/<int:id>/', views.CategoryDetailAPIView.as_view(), name="category_detail"),
+
+    path('', include(router.urls)),
+
     path('task/<int:id>/subtasks/', views.SubTaskListCreateAPIView.as_view(), name="subtask_list_create"),
     path('task/<int:id>/subtasks/<int:sub_id>/', views.SubTaskRetrieveUpdateDestroyAPIView.as_view()
          , name="subtask_detail_update_delete"),

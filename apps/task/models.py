@@ -109,6 +109,9 @@ class Category(models.Model):
     """Категория задач с уникальным именем и значением Other по умолчанию."""
 
     name = models.CharField(max_length=80, default="Other", unique=True, verbose_name=_("Category"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is deleted"))
+    deleted_at = models.DateTimeField(blank=True, null=True, verbose_name=_("Deleted at"))
+
 
     class Meta:
         """Метаданные и ограничения модели Category."""

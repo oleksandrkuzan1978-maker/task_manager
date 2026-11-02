@@ -10,9 +10,6 @@ from apps.task.models import Task, SubTask
 from apps.serializers.subtasks import SubTaskCreateSerializer, SubTaskSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-from orm_requests import task
-
-
 class SubTaskListCreateAPIView(ListCreateAPIView):
     """Получение списка подзадач и создание подзадач указанной задачи."""
     queryset = SubTask.objects.select_related("task")

@@ -16,6 +16,7 @@ from .subtasks import  (
 from .categories import (
     CategoryDetailAPIView,
     CategoryGetAllCreateAPIView,
+    CategoryViewSet,
 )
 
 from .index import index

@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from apps.task.models import Category
 
+
 class CategoryCreateSerializer(serializers.ModelSerializer):
     """Сериализатор имени категории с проверками уникальности при создании и обновлении."""
     class Meta:
         """Поля и параметры сериализации CategoryCreateSerializer."""
         model = Category
-        fields = ['name',]
+        fields = ['id', 'name',]
         extra_kwargs = {"name": {"default": Category._meta.get_field("name").get_default,},} #{"default": "Other"}
 
     def create(self, validated_data):
