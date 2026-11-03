@@ -1,4 +1,5 @@
 """Административный интерфейс задач, подзадач, категорий и тегов."""
+from itertools import count
 
 from django.contrib import admin
 from .models import Task, SubTask, Category, Status, Tag
@@ -75,10 +76,58 @@ class SubTaskAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Отображать имя категории в списке админки."""
-
-    list_display = ('name',)
+    list_display = ('name', "is_deleted", "deleted_at")
+    list_filter = ('is_deleted',)
     search_fields = ('name',)
     fields = ('name',)
+
+    # Признаки удаления отображаем, но не редактируем вручную.
+    fields = ('name', "is_deleted", "deleted_at")
+    readonly_fields = ("is_deleted", "deleted_at")
+
+    actions = (
+        "soft_delete_selected",
+        "restore_selected",
+        "hard_delete_selected",
+    )
+
+    def get_queryset(self, request):
+        """В админке показываем активные и удалённые категории."""
+        return Category.all_objects.all().order_by('name')
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        # Убираем стандартное массовое действие с неоднозначной подписью.
+        actions.pop("delete_selected", None)
+        return actions
+
+    @admin.action( description="Мягко удалить выбранные категории",
+                   permissions=["delete"],)
+    def soft_delete_selected(self, request, queryset):
+        count_ = queryset.soft_delete()
+
+        self.message_user(request, f"Мягко удалено категорий: {count_}.",
+            messages.SUCCESS,)
+
+    @admin.action(description="Восстановить выбранные категории",
+        permissions=["change"],)
+    def restore_selected(self, request, queryset):
+        count_ = queryset.restore()
+
+        self.message_user(request, f"Восстановлено категорий: {count}.",
+            messages.SUCCESS,)
+
+    @admin.action(description="Удалить из БД выбранные удалённые категории",
+        permissions=["delete"],)
+    def hard_delete_selected(self, request, queryset):
+        """hard_delete() удаляет только записи с is_deleted=True."""
+        deleted = queryset.deleted()
+        count_ = queryset.count()
+        deleted.hard_delete()
+
+        self.message_user(request,  f"Физически удалено категорий: {count}.",
+            messages.SUCCESS,)
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

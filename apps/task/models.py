@@ -5,6 +5,8 @@ from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from  django.db.models.functions import TruncDate
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
+from .managers import SoftDeleteManager, SoftDeleteQuerySet, TaskManager
 # Create your models here.
 
 class Status(models.TextChoices):
@@ -44,6 +46,9 @@ class Task(models.Model):
     deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
+    objects = TaskManager()
+    all_objects = models.Manager()
+
     # {
     #     "title": "Подготовить отчёт",
     #     "description": "Собрать данные и подготовить итоговый отчёт",
@@ -58,6 +63,10 @@ class Task(models.Model):
         ordering = ["-created_at"]
         verbose_name = _("Task")
         verbose_name_plural = _("Tasks")
+
+        base_manager_name = "all_objects"
+        default_manager_name = "all_objects"
+
         constraints = [
             models.UniqueConstraint(
                 TruncDate("created_at"),
@@ -112,13 +121,37 @@ class Category(models.Model):
     is_deleted = models.BooleanField(default=False, verbose_name=_("Is deleted"))
     deleted_at = models.DateTimeField(blank=True, null=True, verbose_name=_("Deleted at"))
 
+    objects = SoftDeleteManager() # Менеджер, который скрывает мягко удаленные записи в Таблице БД
+    all_objects = SoftDeleteQuerySet.as_manager()  # Менеджер позволяет работать со всеми записями, включая удаленные
 
     class Meta:
         """Метаданные и ограничения модели Category."""
         db_table = "task_manager_category"
         verbose_name = _("Category")
-        verbose_name_plural = _("Categories")
         constraints = [models.UniqueConstraint(fields=["name"], name="unique_category"),]
+
+    def delete(self, using=None, keep_parents=False):
+        """Мягкое удаление одного объекта."""
+        if self.is_deleted:
+            return 0, {"number of soft-deleted records": 0}
+
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save(using=using
+                  , update_fields=["is_deleted", "deleted_at"]
+                  )
+        return 1, {"number of soft-deleted records": 1}
+
+    def restore(self, using=None):
+        """Восстановление одного объекта."""
+        self.is_deleted = False
+        self.deleted_at = None
+        self.save(using=using, update_fields=["is_deleted", "deleted_at"])
+
+    def full_delete(self, using=None, keep_parents=False):
+        """Физическое удаление одного объекта."""
+        return super().delete(using=using, keep_parents=keep_parents,)
+
 
     def __str__(self):
         """Вернуть имя категории."""
