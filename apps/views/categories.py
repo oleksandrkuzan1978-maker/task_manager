@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from unicodedata import category
 
 from apps.task.models import Category
 from apps.serializers.categories import CategoryCreateSerializer
@@ -13,7 +12,39 @@ from rest_framework.decorators import action
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.order_by("id")
     serializer_class = CategoryCreateSerializer
-    @action(detail=True, methods=['get'])
+
+    def get_queryset(self):
+        # Для восстановления и окончательного удаления
+         #нужны все категории, включая мягко удалённые.
+        if self.action in ("restore", "hard_delete"):
+            return Category.all_objects.order_by("id")
+        # Для остальных действий — только активные категории.
+        return super().get_queryset()
+
+    @action(detail=True, methods=["post"])
+    def restore(self, request, pk=None):
+        """Восстановить мягко удалённую категорию."""
+        category = self.get_object()
+
+        if not category.is_deleted:
+            return Response({"detail": "The category is already active."},
+                status=status.HTTP_400_BAD_REQUEST,)
+        category.restore()
+        serializer = self.get_serializer(category)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["delete"],  url_path="hard-delete",)
+    def hard_delete(self, request, pk=None):
+        """Физически удалить ранее мягко удалённую категорию."""
+        category = self.get_object()
+        if not category.is_deleted:
+            return Response({"detail": "First, perform a soft delete."}
+                            , status=status.HTTP_400_BAD_REQUEST )
+        category.full_delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['get'], url_path="count-tasks",)
     def count_tasks(self, request, pk=None):
         category = self.get_object()
         return Response({"id": category.pk,
