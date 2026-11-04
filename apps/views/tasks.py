@@ -2,7 +2,6 @@
 from django.db import OperationalError
 from django.utils import timezone
 from django.db.models import Count
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +14,7 @@ from .variables import weekdays, message_response_weekday
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 # from django_filters.rest_framework import DjangoFilterBackend
 # from rest_framework.filters import SearchFilter, OrderingFilter
+
 
 class TaskListCreateAPIView(ListCreateAPIView):
     """Получение списка задач и создание новой задачи."""

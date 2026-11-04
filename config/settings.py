@@ -48,7 +48,102 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',
                                               'rest_framework.filters.SearchFilter',
-                                              'rest_framework.filters.OrderingFilter',)}
+                                              'rest_framework.filters.OrderingFilter',),
+              'DEFAULT_PAGINATION_CLASS': 'apps.views.pagination.TaskCursorPagination',
+                  'PAGE_SIZE': 2,}
+
+
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+'colored': {
+        '()': 'colorlog.ColoredFormatter',
+    'format': '{log_color} {levelname}: [{asctime}] - {message}',
+    'style': '{',
+    'datefmt': '%H:%M:%S',
+
+        'log_colors': {
+            'DEBUG': 'white',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'bold_red,bg_white',
+        },
+    },
+
+        'sql': {
+            'format': '{levelname}: [{asctime}] - {message}',
+            'style': '{',
+            'datefmt': '%H:%M:%S',
+        }
+    },
+
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'colored',
+
+        },
+        'db_request_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'sql',
+            'filename': LOGS_DIR / 'db_logs.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5, # хранить до 5 резервных файлов.
+            'encoding': 'utf8',
+        },
+        'http_request_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'sql',
+            'filename': LOGS_DIR / 'http_logs.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'encoding': 'utf8',
+        },
+
+    },
+    'loggers': {
+        # Отвечает за общие сообщения Django: системные события,
+        # предупреждения и другие сообщения фреймворка
+        'django': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        },
+
+        # Отвечает за сообщения, связанные с обработкой HTTP-запросов и ошибками при их выполнении
+        'django.request': {
+            'handlers': ['http_request_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        'http': {
+            'handlers': ['http_request_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+
+        # Отвечает за сообщения, связанные с работой шаблонов Django
+        'django.template': {
+        },
+
+        # Отвечает за SQL-запросы к базе данных
+        'django.db.backends': {
+            'handlers': ['db_request_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+    }
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,6 +153,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'logs.middleware.RequestLoggingMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
