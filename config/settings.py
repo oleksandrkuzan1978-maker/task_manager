@@ -56,6 +56,18 @@ REST_FRAMEWORK = {'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.Dja
 LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(exist_ok=True)
 
+http_request_log = {
+            'handlers': ['http_request_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+request_file_log = {'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'sql',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5, # хранить до 5 резервных файлов.
+            'encoding': 'utf8',}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -91,22 +103,12 @@ LOGGING = {
 
         },
         'db_request_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'formatter': 'sql',
+            **request_file_log,
             'filename': LOGS_DIR / 'db_logs.log',
-            'maxBytes': 1024 * 1024 * 5,
-            'backupCount': 5, # хранить до 5 резервных файлов.
-            'encoding': 'utf8',
         },
         'http_request_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'formatter': 'sql',
+            **request_file_log,
             'filename': LOGS_DIR / 'http_logs.log',
-            'maxBytes': 1024 * 1024 * 5,
-            'backupCount': 5,
-            'encoding': 'utf8',
         },
 
     },
@@ -119,17 +121,9 @@ LOGGING = {
         },
 
         # Отвечает за сообщения, связанные с обработкой HTTP-запросов и ошибками при их выполнении
-        'django.request': {
-            'handlers': ['http_request_file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-
-        'http': {
-            'handlers': ['http_request_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
+        'django.request': http_request_log,
+        # Собственный логгер. Отвечает за сообщения, связанные с обработкой HTTP-запросов
+        'http': http_request_log,
 
         # Отвечает за сообщения, связанные с работой шаблонов Django
         'django.template': {
@@ -153,7 +147,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    # Подключение middleware settings.py
     'logs.middleware.RequestLoggingMiddleware'
 ]
 
