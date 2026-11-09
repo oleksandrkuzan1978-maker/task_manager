@@ -50,8 +50,19 @@ REST_FRAMEWORK = {'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.Dja
                                               'rest_framework.filters.SearchFilter',
                                               'rest_framework.filters.OrderingFilter',),
               'DEFAULT_PAGINATION_CLASS': 'apps.views.pagination.TaskCursorPagination',
-                  'PAGE_SIZE': 2,}
+                  'PAGE_SIZE': 2,
+              'DEFAULT_AUTHENTICATION_CLASSES': [
+                    'rest_framework_simplejwt.authentication.JWTAuthentication'],
+              "DEFAULT_PERMISSION_CLASSES": [
+                    "rest_framework.permissions.IsAuthenticated",],
+              }
 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
 
 LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(exist_ok=True)
@@ -115,10 +126,10 @@ LOGGING = {
     'loggers': {
         # Отвечает за общие сообщения Django: системные события,
         # предупреждения и другие сообщения фреймворка
-        'django': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-        },
+        # 'django': {
+        # 'handlers': ['console'],
+        # 'level': 'DEBUG',
+        # },
 
         # Отвечает за сообщения, связанные с обработкой HTTP-запросов и ошибками при их выполнении
         'django.request': http_request_log,
