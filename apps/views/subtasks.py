@@ -9,10 +9,12 @@ from rest_framework import status
 from apps.task.models import Task, SubTask
 from apps.serializers.subtasks import SubTaskCreateSerializer, SubTaskSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated
 
 class SubTaskListCreateAPIView(ListCreateAPIView):
     """Получение списка подзадач и создание подзадач указанной задачи."""
     queryset = SubTask.objects.select_related("task")
+    #permission_classes = [IsAuthenticated]
 
     # Фильтрация по полям
     filterset_fields = {"status": ["exact"],
@@ -42,6 +44,7 @@ class SubTaskListCreateAPIView(ListCreateAPIView):
 class SubTaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Просмотр, обновление и удаление подзадачи указанной задачи."""
     queryset = SubTask.objects.select_related("task")
+    #permission_classes = [IsAuthenticated]
 
     lookup_url_kwarg = "sub_id"
 
@@ -52,13 +55,6 @@ class SubTaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         if self.request.method == "PATCH":
             return SubTaskCreateSerializer
         return SubTaskSerializer
-
-
-
-
-
-
-
 
 
 def paginator(pages, request, name_pages):
@@ -79,6 +75,8 @@ def paginator(pages, request, name_pages):
 
 class SubtaskGetByParamAPIView(APIView):
     """Список подзадач с фильтрами по названию задачи и статусу."""
+    #permission_classes = [IsAuthenticated]
+
     def get(self, request):
         """Вернуть подзадачи от новых к старым, по пять на странице."""
         title = request.query_params.get("title", "").strip()
@@ -100,6 +98,8 @@ class SubtaskGetByParamAPIView(APIView):
 
 class SubTaskGetAllCreateAPIView(APIView):
     """Создание подзадачи и получение списка подзадач указанной задачи."""
+    #permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         """Проверить входные данные и сохранить подзадачу для задачи из URL."""
 
@@ -126,6 +126,7 @@ class SubTaskGetAllCreateAPIView(APIView):
 
 class SubTaskDetailUpdateDeleteView(APIView):
     """Просмотр, частичное обновление и удаление подзадачи указанной задачи."""
+    #permission_classes = [IsAuthenticated]
         
     def get(self, request, id, sub_id):
         """Вернуть подзадачу, проверив её принадлежность указанной задаче."""

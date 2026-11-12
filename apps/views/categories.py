@@ -9,10 +9,14 @@ from apps.serializers.categories import CategoryCreateSerializer
 from rest_framework import viewsets
 from rest_framework.decorators import action
 
+from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.order_by("id")
     serializer_class = CategoryCreateSerializer
+    #permission_classes = [IsAuthenticated, StaffOrReadOnly]
+    pagination_class = None
 
     def get_queryset(self):
         # Для восстановления и окончательного удаления
@@ -54,6 +58,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class CategoryGetAllCreateAPIView(APIView):
     """Метод создания категории past, не подключённый к HTTP POST; обработчик GET отсутствует."""
+    #permission_classes = [IsAuthenticated, StaffOrReadOnly]
+
     def post(self, request):
         """Проверить имя и создать категорию; имя past не является обработчиком POST."""
         serializer = CategoryCreateSerializer(data=request.data)
@@ -72,6 +78,8 @@ class CategoryGetAllCreateAPIView(APIView):
 
 class CategoryDetailAPIView(APIView):
     """Частичное обновление имени существующей категории."""
+    #permission_classes = [IsAuthenticated, StaffOrReadOnly]
+
     def patch(self, request, id):
         """Найти категорию, проверить входные данные и сохранить частичное обновление."""
         category = get_object_or_404(Category, id=id)

@@ -11,9 +11,10 @@ from apps.serializers.tasks import (TaskCreateSerializer, TaskSerializer, TaskDe
 
 from .variables import weekdays, message_response_weekday
 
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 # from django_filters.rest_framework import DjangoFilterBackend
 # from rest_framework.filters import SearchFilter, OrderingFilter
+from apps.permissions import OnlyAdmin
 
 
 class TaskListCreateAPIView(ListCreateAPIView):
@@ -42,6 +43,7 @@ class TaskListCreateAPIView(ListCreateAPIView):
 class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Получение, обновление и удаление отдельной задачи."""
     queryset = Task.objects.prefetch_related("categories", "tags", "subtasks",)
+
     #serializer_class = TaskSerializer
 
     #В существующем маршруте используется <int:id>
@@ -54,13 +56,10 @@ class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
 
 
-
-
-
-
-
 class TaskGetAllCreateAPIView(APIView):
     """Список задач и метод создания past, не подключённый к HTTP POST."""
+
+
     def post(self, request):
         """Проверить входные данные и создать задачу; имя past не является обработчиком POST."""
         serializer = TaskCreateSerializer(data=request.data)
@@ -102,6 +101,8 @@ class TaskGetAllCreateAPIView(APIView):
 
 class TaskDetailAPIView(APIView):
     """Получение отдельной задачи со связанными подзадачами."""
+
+
     def get(self, request, id):
         """Представление для получения конкретной задачи."""
         try:
@@ -113,8 +114,9 @@ class TaskDetailAPIView(APIView):
 
 
 class TaskAggregateAPIView(APIView):
-
     """Получение общего количества задач, распределения по статусам и числа просроченных задач."""
+    permission_classes = [OnlyAdmin]
+
     def get(self, request):
         """Посчитать задачи и просроченные задачи без DONE; обработать доступные в try ошибки OperationalError."""
         try:
