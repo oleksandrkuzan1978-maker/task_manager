@@ -51,7 +51,7 @@ REST_FRAMEWORK = {'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.Dja
                                               'rest_framework.filters.SearchFilter',
                                               'rest_framework.filters.OrderingFilter',),
               'DEFAULT_PAGINATION_CLASS': 'apps.views.pagination.TaskCursorPagination',
-                  'PAGE_SIZE': 2,
+                  'PAGE_SIZE': 5,
               'DEFAULT_AUTHENTICATION_CLASSES': [
                     'rest_framework_simplejwt.authentication.JWTAuthentication'],
               "DEFAULT_PERMISSION_CLASSES": [
