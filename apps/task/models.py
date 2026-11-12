@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.constraints import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 from  django.db.models.functions import TruncDate
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from .managers import SoftDeleteManager, SoftDeleteQuerySet, TaskManager
@@ -45,6 +46,12 @@ class Task(models.Model):
     status = models.CharField(choices=Status, default=Status.NEW, max_length=20, verbose_name=_("Status"))
     deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="tasks",
+        verbose_name=_("Owner"),
+    )
 
     objects = TaskManager()
     all_objects = models.Manager()
@@ -96,6 +103,12 @@ class SubTask(models.Model):
     status = models.CharField(choices=Status, default=Status.NEW, max_length=20, verbose_name=_("Status"))
     deadline = models.DateTimeField(blank=True, null=True, verbose_name=_("Deadline"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL
+        , on_delete=models.CASCADE
+        , related_name="subtasks"
+        , verbose_name=_("Owner"),
+    )
 
     class Meta:
         """Метаданные и ограничения модели SubTask."""

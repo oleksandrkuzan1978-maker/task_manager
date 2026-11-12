@@ -9,7 +9,7 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации SubTaskCreateSerializer."""
         model = SubTask
         fields = '__all__'
-        read_only_fields = ('id', 'created_at', "task")
+        read_only_fields = ('id', 'created_at', 'owner')
 
 
 class SubTaskSerializer(serializers.ModelSerializer):
@@ -18,5 +18,5 @@ class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
         fields = "__all__"
-
+        read_only_fields = ('id', 'created_at', 'owner')
 

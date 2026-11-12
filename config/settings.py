@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_filters',
+    'drf_yasg',
 
     'apps.task.apps.TaskConfig',
     'rest_framework_simplejwt.token_blacklist',
@@ -164,6 +165,8 @@ MIDDLEWARE = [
     # Подключение middleware settings.py
     'logs.middleware.RequestLoggingMiddleware'
 ]
+
+#AUTH_USER_MODEL = 'users.User'
 
 ROOT_URLCONF = 'config.urls'
 

@@ -2,7 +2,8 @@
 import random
 from datetime import timedelta
 
-from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 from faker import Faker
@@ -17,7 +18,11 @@ class Command(BaseCommand):
     help = 'Заполняет базу тестовыми данными'
 
     def add_arguments(self, parser):
-        """Добавить флаг --clear для очистки данных перед заполнением."""
+        """Добавить выбор владельца и флаг очистки данных."""
+        parser.add_argument(
+            '--owner', required=True,
+            help='Имя существующего пользователя, которому принадлежат тестовые задачи.',
+        )
         parser.add_argument('--clear', action='store_true'
                             , help='Удалить старые данные перед заполнением')
 
@@ -25,6 +30,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Создать тестовые задачи, категории и связанные подзадачи."""
         from uuid import uuid4
+
+        user_model = get_user_model()
+        username = options['owner']
+        try:
+            owner = user_model._default_manager.get_by_natural_key(username)
+        except user_model.DoesNotExist:
+            raise CommandError(f'Пользователь {username!r} не найден.') from None
 
         if options.get('clear', False):
             self.clear()
@@ -45,6 +57,7 @@ class Command(BaseCommand):
                 if random.choice((True, False)) else None
             )
             task = Task(
+                owner=owner,
                 title=title[:Task._meta.get_field('title').max_length],
                 description=faker.paragraph(nb_sentences=3),
                 status=random.choice(Status.values),
@@ -61,6 +74,7 @@ class Command(BaseCommand):
                 title = f'Подзадача {number}: {faker.sentence(nb_words=4)}'
                 subtask = SubTask(
                     task=task,
+                    owner=task.owner,
                     # Номер обеспечивает уникальность названия внутри задачи.
                     title=title[:SubTask._meta.get_field('title').max_length],
                     description=faker.paragraph(nb_sentences=2),

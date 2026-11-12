@@ -10,7 +10,7 @@ class TaskSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации TaskSerializer."""
         model = Task
         exclude = ('description',)
-        read_only_fields = ('id', 'created_at',)
+        read_only_fields = ('id', 'created_at', 'owner')
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации TaskCreateSerializer."""
         model = Task
         fields = '__all__'
-        read_only_fields = ('id', 'created_at',)
+        read_only_fields = ('id', 'created_at', 'owner')
 
     @staticmethod
     def validate_deadline(value):
@@ -37,4 +37,4 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         """Поля и параметры сериализации TaskDetailSerializer."""
         model = Task
         fields = '__all__'
-        read_only_fields = ('id', 'created_at')
+        read_only_fields = ('id', 'created_at', 'owner')
